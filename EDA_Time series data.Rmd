@@ -1,0 +1,80 @@
+---
+title: "EDA on Time seies data"
+author: "Mariya Biju"
+date: "21/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(forecast)
+library(tseries)
+```
+
+```{r}
+#load data
+US_candy_production <- read.csv("C:/Users/HP/Downloads/candy_production.csv")
+# Take a look at the class of the dataset US_candy_production
+str(US_candy_production)
+```
+
+```{r}
+# Assign more meaningful variable names
+colnames(US_candy_production)<-c("Period","candy_production")
+
+```
+
+```{r}
+# Convert data into time series dataset
+attach(US_candy_production)
+candyts<-ts(candy_production,c(1972,1),c(2017,8),12)
+str(candyts)
+```
+
+```{r}
+#EDA
+# Take a peek at the dataset
+candyts
+# Check for missing values
+sum(is.na(candyts))
+# Check the frequency of the time series data
+frequency(candyts)
+# Check the cycle of the time series
+cycle(candyts)
+# Review the summary statistics
+summary(candyts)
+```
+
+
+```{r}
+# Plot the raw data using the base plot function
+plot(candyts,xlab="Year", ylab = "Candy Production as (%) of 2012 Production",main="Monthly US Candy Production from 1972 to 2017")
+
+
+autoplot(candyts) + labs(x ="Year", y = "Candy Production as (%) of 2012 Production", title="Monthly US Candy Production from 1972 to 2017") + theme_classic()
+
+boxplot(candyts~cycle(candyts),xlab="Month", ylab = "Candy Production as (%) of 2012 Production" ,main ="Monthly US Candy Production from 1972 to 2017")
+
+```
+
+```{r}
+#TIME SERIES DECOMPOSITION
+#We will decompose the time series for estimates of trend, seasonal, and random components using moving average method.
+#The multiplicative model is: Y[t]=T[t] x S[t] x e[t]
+#where:
+#Y(t) is the candy production at time t,
+#T(t) is the trend component at time t,
+#S(t) is the seasonal component at time t,
+#e(t) is the random error component at time t.
+#With this model, we will use the decompose function in R. Continuing to use it for plots, in one line, autoplot these decomposed components to further analyse the data.
+decompose_candyts <- decompose(candyts,"multiplicative")
+autoplot(decompose_candyts) + theme_classic()
+
+```
+
+
